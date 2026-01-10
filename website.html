@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Video</title>
+    <style>
+        /* 1. Basic Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: black;
+            font-family: Arial, sans-serif;
+        }
+
+        /* 2. The Video Styling */
+        #bg-video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: 1; /* Behind the overlay */
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            display: none; /* Hidden until clicked */
+        }
+
+        /* 3. The "Click to Enter" Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            z-index: 10; /* Sits on top of everything */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* 4. The Button Style */
+        .enter-btn {
+            color: white;
+            border: 2px solid white;
+            padding: 20px 40px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: transparent;
+            transition: background 0.3s;
+        }
+
+        .enter-btn:hover {
+            background: white;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- The Overlay Screen -->
+    <div id="overlay">
+        <button class="enter-btn">Click to Play.</button>
+    </div>
+
+    <!-- The Video (Note: No 'muted' attribute here) -->
+    <video id="bg-video" loop playsinline>
+        <source src="tito-dads-video.mp4" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+
+    <script>
+        // Get elements
+        const overlay = document.getElementById('overlay');
+        const video = document.getElementById('bg-video');
+
+        // Function to handle the start
+        function startExperience() {
+            // 1. Show the video
+            video.style.display = 'block';
+            
+            // 2. Play the video with sound
+            video.play().then(() => {
+                // 3. If successful, fade out/remove the overlay
+                overlay.style.display = 'none';
+            }).catch(error => {
+                console.log("Browser prevented playback: ", error);
+            });
+        }
+
+        // Add event listener to the whole overlay (user can click anywhere)
+        overlay.addEventListener('click', startExperience);
+    </script>
+
+</body>
+</html>
