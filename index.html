@@ -2,45 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Ensures the site scales correctly on mobile phones -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- This meta tag is critical for mobile scaling and the 'notch' on iPhones -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>In Loving Memory</title>
     <link rel="icon" href="data:,">
     <style>
-        /* 1. Basic Reset */
+        /* 1. Global Reset */
         * { box-sizing: border-box; }
         body, html {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            /* Use dvh (Dynamic Viewport Height) to fix mobile address bar jumps */
+            height: 100dvh; 
             background-color: black;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* 2. Container to center the video */
+        /* 2. Main Container */
         #container {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            background: black;
         }
 
-        /* 3. The Video Styling */
+        /* 3. The Video Logic - "Contain" ensures no text is cut off */
         video {
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
-            /* 'contain' ensures the whole video fits on the screen */
-            object-fit: contain; 
-            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ensures the whole video is visible */
         }
 
-        /* 4. The Overlay (Black screen with button) */
+        /* 4. The Overlay (Start Screen) */
         #overlay {
             position: absolute;
             top: 0;
@@ -48,50 +48,76 @@
             width: 100%;
             height: 100%;
             background-color: black;
-            z-index: 99;
+            z-index: 50;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
             transition: opacity 0.8s ease;
         }
 
-        /* 5. The Button Style */
+        /* 5. Button Styling */
         .play-btn {
             background: transparent;
             color: white;
             border: 2px solid white;
-            padding: 20px 40px;
+            padding: 18px 36px;
             font-size: 18px;
             text-transform: uppercase;
             letter-spacing: 2px;
             border-radius: 50px;
             pointer-events: none;
         }
-        
+
         .hint {
-            color: #999;
+            color: #aaa;
             margin-top: 20px;
             font-size: 14px;
+            text-align: center;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        /* 6. Landscape Recommendation (Optional but helpful) */
+        .rotate-hint {
+            position: absolute;
+            bottom: 30px;
+            color: #666;
+            font-size: 12px;
+            display: none; /* Hidden by default */
+            animation: pulse 2s infinite;
+        }
+
+        /* Only show rotate hint on portrait phones */
+        @media (orientation: portrait) {
+            .rotate-hint { display: block; }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
     </style>
 </head>
 <body>
 
     <div id="container">
-        <!-- THE OVERLAY -->
+        
+        <!-- START SCREEN OVERLAY -->
         <div id="overlay" onclick="startVideo()">
             <button class="play-btn">Watch Memorial</button>
             <div class="hint">Tap anywhere to start</div>
+            <div class="rotate-hint">↻ For best view, rotate your phone</div>
         </div>
 
-        <!-- THE VIDEO PLAYER -->
-        <!-- playsinline is crucial for iPhones -->
-        <video id="vid" playsinline loop>
+        <!-- VIDEO PLAYER -->
+        <!-- playsinline is REQUIRED for iPhone to not go full-screen automatically -->
+        <video id="vid" playsinline>
             <source src="https://github.com/gozuncarlos/dads-vid/releases/download/video/funeral-ceremony.for.tito.dads.pptx.mp4" type="video/mp4">
             Your browser does not support the video tag.
         </video>
+
     </div>
 
     <script>
@@ -99,14 +125,15 @@
             var v = document.getElementById('vid');
             var o = document.getElementById('overlay');
 
-            // Try to play the video
             v.play().then(() => {
-                // If successful, fade out the black overlay
+                // If play is successful, fade out overlay
                 o.style.opacity = '0';
-                setTimeout(() => { o.style.display = 'none'; }, 800);
+                setTimeout(() => { 
+                    o.style.display = 'none'; 
+                }, 800);
             }).catch(error => {
                 console.log("Play error: " + error);
-                // If it fails (rare), allow the user to click again
+                // If it fails, usually means user needs to tap again (browser blocked it)
             });
         }
     </script>
