@@ -2,11 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Ensures the site scales correctly on mobile phones -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>In Loving Memory</title>
     <link rel="icon" href="data:,">
     <style>
-        /* 1. Make the page full screen black */
+        /* 1. Basic Reset */
+        * { box-sizing: border-box; }
         body, html {
             margin: 0;
             padding: 0;
@@ -14,60 +16,62 @@
             height: 100%;
             background-color: black;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        /* 2. The Video Styling (Hidden branding) */
+        /* 2. Container to center the video */
+        #container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 3. The Video Styling */
         video {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             width: auto;
             height: auto;
-            transform: translate(-50%, -50%);
-            object-fit: cover; /* Ensures video covers screen without stretching */
+            /* 'contain' ensures the whole video fits on the screen */
+            object-fit: contain; 
+            display: block;
         }
 
-        /* 3. The "Click to Enter" Overlay */
+        /* 4. The Overlay (Black screen with button) */
         #overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000; /* Solid black start */
-            z-index: 20;
+            background-color: black;
+            z-index: 99;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            transition: opacity 1s ease; /* Smooth fade out */
+            transition: opacity 0.8s ease;
         }
 
-        /* 4. The Button Style */
+        /* 5. The Button Style */
         .play-btn {
             background: transparent;
             color: white;
             border: 2px solid white;
-            padding: 15px 40px;
-            font-size: 20px;
+            padding: 20px 40px;
+            font-size: 18px;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             border-radius: 50px;
-            transition: all 0.3s;
+            pointer-events: none;
         }
-
-        .play-btn:hover {
-            background: white;
-            color: black;
-            transform: scale(1.05);
-        }
-
-        .sub-text {
-            color: #888;
+        
+        .hint {
+            color: #999;
             margin-top: 20px;
             font-size: 14px;
         }
@@ -75,41 +79,37 @@
 </head>
 <body>
 
-    <!-- THE OVERLAY (What they see first) -->
-    <div id="overlay" onclick="startVideo()">
-        <button class="play-btn">Watch Memorial</button>
-        <div class="sub-text">Click anywhere to start</div>
-    </div>
+    <div id="container">
+        <!-- THE OVERLAY -->
+        <div id="overlay" onclick="startVideo()">
+            <button class="play-btn">Watch Memorial</button>
+            <div class="hint">Tap anywhere to start</div>
+        </div>
 
-    <!-- THE VIDEO PLAYER -->
-    <!-- REPLACE THE LINK BELOW WITH YOUR COPIED GITHUB RELEASE LINK -->
-    <video id="memorial-video" playsinline loop>
-        <source src="https://github.com/gozuncarlos/dads-vid/releases/download/video/funeral-ceremony.for.tito.dads.pptx.mp4" type="video/mp4">
-        Your browser does not support HTML5 video.
-    </video>
+        <!-- THE VIDEO PLAYER -->
+        <!-- playsinline is crucial for iPhones -->
+        <video id="vid" playsinline loop>
+            <source src="https://github.com/gozuncarlos/dads-vid/releases/download/video/funeral-ceremony.for.tito.dads.pptx.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
 
     <script>
         function startVideo() {
-            var video = document.getElementById('memorial-video');
-            var overlay = document.getElementById('overlay');
+            var v = document.getElementById('vid');
+            var o = document.getElementById('overlay');
 
-            // 1. Play the video
-            video.play().then(() => {
-                // 2. If it plays successfully, fade out the overlay
-                overlay.style.opacity = '0';
-                
-                // 3. Remove overlay from screen after fade finishes (1 second)
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                }, 1000);
+            // Try to play the video
+            v.play().then(() => {
+                // If successful, fade out the black overlay
+                o.style.opacity = '0';
+                setTimeout(() => { o.style.display = 'none'; }, 800);
             }).catch(error => {
-                console.log("Play prevented:", error);
-                alert("Please tap the screen to play.");
+                console.log("Play error: " + error);
+                // If it fails (rare), allow the user to click again
             });
         }
     </script>
 
 </body>
 </html>
-
-
