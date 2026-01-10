@@ -2,36 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- CRITICAL MOBILE TAGS: 
-         1. prevents zooming 
-         2. handles the iPhone notch 
-         3. forces 1:1 scale -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>In Loving Memory</title>
     
-    <!-- Elegant Fonts for the Memorial Feel -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 
     <style>
-        /* 1. MOBILE RESET */
         * { 
             box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; /* Removes blue box on Android taps */
+            -webkit-tap-highlight-color: transparent; 
         }
         
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
-            /* 100dvh = Dynamic Viewport Height (Ignores mobile URL bar) */
             height: 100dvh; 
             background-color: #000;
-            overflow: hidden; /* Locks scrolling */
+            overflow: hidden; 
         }
 
-        /* 2. LAYOUT CONTAINER */
         #container {
             position: fixed;
             top: 0;
@@ -44,24 +36,20 @@
             background: #000;
         }
 
-        /* 3. VIDEO - SAFE FIT */
         video {
             width: 100%;
             height: 100%;
-            /* 'contain' ensures NO text is ever cut off on any phone */
             object-fit: contain; 
-            opacity: 0; /* Hidden until loaded */
+            opacity: 0; 
             transition: opacity 0.5s ease;
         }
 
-        /* 4. THE DESIGNED OVERLAY */
         #overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* Elegant dark gradient */
             background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%);
             z-index: 100;
             display: flex;
@@ -73,20 +61,17 @@
             transition: opacity 0.8s ease, visibility 0.8s;
         }
 
-        /* 5. TYPOGRAPHY (Responsive) */
         h1 {
             font-family: 'Playfair Display', serif;
             font-style: italic;
             color: white;
             font-weight: 400;
-            /* Text scales with screen width (vmin) so it never breaks */
             font-size: 8vmin; 
             margin-bottom: 40px;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
             line-height: 1.2;
         }
 
-        /* 6. THE BIG BUTTON */
         .btn-wrapper {
             position: relative;
             width: 80px;
@@ -96,7 +81,6 @@
             align-items: center;
         }
 
-        /* The Circle Ring */
         .circle {
             width: 100%;
             height: 100%;
@@ -105,7 +89,6 @@
             animation: pulse 2s infinite;
         }
 
-        /* The Play Triangle */
         .play-icon {
             position: absolute;
             width: 0; 
@@ -113,7 +96,7 @@
             border-top: 12px solid transparent;
             border-bottom: 12px solid transparent;
             border-left: 20px solid white;
-            margin-left: 5px; /* Visual center correction */
+            margin-left: 5px; 
         }
 
         .tap-text {
@@ -125,9 +108,8 @@
             text-transform: uppercase;
         }
 
-        /* 7. LOADING STATE */
         .spinner {
-            display: none; /* Hidden by default */
+            display: none; 
             width: 50px;
             height: 50px;
             border: 3px solid rgba(255,255,255,0.3);
@@ -137,7 +119,6 @@
             position: absolute;
         }
 
-        /* 8. ORIENTATION HINT */
         .rotate-hint {
             position: absolute;
             bottom: 40px;
@@ -146,32 +127,27 @@
             font-size: 11px;
             display: none;
         }
-        /* Only show rotate hint if phone is vertical */
+        
         @media (orientation: portrait) { .rotate-hint { display: block; } }
 
-        /* Animations */
         @keyframes pulse {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
             70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(255,255,255,0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
     </style>
 </head>
 <body>
 
     <div id="container">
         
-        <!-- THE OVERLAY -->
-        <!-- Added touchstart for faster response on Android/iOS -->
         <div id="overlay" onclick="startExperience()" ontouchstart="startExperience()">
             <h1>In Loving<br>Memory</h1>
             
             <div class="btn-wrapper">
                 <div class="circle" id="btn-circle"></div>
                 <div class="play-icon" id="btn-icon"></div>
-                <!-- Loading spinner sits on top -->
                 <div class="spinner" id="loading-spinner"></div>
             </div>
 
@@ -179,8 +155,6 @@
             <div class="rotate-hint">↻ Rotate phone for best view</div>
         </div>
 
-        <!-- THE VIDEO -->
-        <!-- Your GitHub Release Link -->
         <video id="vid" playsinline preload="auto">
             <source src="https://github.com/gozuncarlos/dads-vid/releases/download/video/funeral-ceremony.for.tito.dads.pptx.mp4" type="video/mp4">
         </video>
@@ -191,7 +165,6 @@
         var isTryingToPlay = false;
 
         function startExperience() {
-            // Prevent double taps
             if (isTryingToPlay) return;
             isTryingToPlay = true;
 
@@ -202,25 +175,20 @@
             var circle = document.getElementById('btn-circle');
             var text = document.getElementById('status-text');
 
-            // 1. IMMEDIATE FEEDBACK (Crucial for mobile data)
-            // Change UI to "Loading" so they know it worked
             icon.style.display = 'none';
-            circle.style.animation = 'none'; // Stop pulsing
+            circle.style.animation = 'none'; 
             circle.style.border = 'none';
             spinner.style.display = 'block';
             text.innerText = "LOADING...";
 
-            // 2. PLAY COMMAND
             video.play().then(() => {
-                // 3. SUCCESS
-                video.style.opacity = '1'; // Reveal video
-                overlay.style.opacity = '0'; // Hide overlay
+                video.style.opacity = '1'; 
+                overlay.style.opacity = '0'; 
                 setTimeout(() => { 
                     overlay.style.visibility = 'hidden'; 
                 }, 800);
             }).catch(error => {
-                // 4. ERROR (Reset UI if it fails)
-                console.log("Play failed", error);
+                console.log(error);
                 isTryingToPlay = false;
                 spinner.style.display = 'none';
                 icon.style.display = 'block';
