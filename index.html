@@ -6,6 +6,7 @@
     <title>In Loving Memory</title>
     <link rel="icon" href="data:,">
     <style>
+        /* 1. Make the page full screen black */
         body, html {
             margin: 0;
             padding: 0;
@@ -13,54 +14,100 @@
             height: 100%;
             background-color: black;
             overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .video-wrapper {
+        /* 2. The Video Styling (Hidden branding) */
+        video {
             position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover; /* Ensures video covers screen without stretching */
+        }
+
+        /* 3. The "Click to Enter" Overlay */
+        #overlay {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            background-color: #000; /* Solid black start */
+            z-index: 20;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            cursor: pointer;
+            transition: opacity 1s ease; /* Smooth fade out */
         }
 
-        iframe {
-            /* This zooms the video to hide the YouTube interface */
-            width: 100vw;
-            height: 56.25vw; 
-            min-height: 100vh;
-            min-width: 177.77vh;
-            transform: scale(1.35); 
-            border: none;
+        /* 4. The Button Style */
+        .play-btn {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 15px 40px;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-radius: 50px;
+            transition: all 0.3s;
         }
 
-        /* Blocks right-clicking on the video */
-        .overlay-shield {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none; 
+        .play-btn:hover {
+            background: white;
+            color: black;
+            transform: scale(1.05);
+        }
+
+        .sub-text {
+            color: #888;
+            margin-top: 20px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <div class="video-wrapper">
-        <!-- Your Video ID: KM4iIl4njqU -->
-        <iframe 
-            src="https://www.youtube.com/embed/KM4iIl4njqU?autoplay=0&controls=0&disablekb=1&playsinline=1&modestbranding=1&rel=0&loop=1&playlist=KM4iIl4njqU" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen>
-        </iframe>
-        
-        <div class="overlay-shield"></div>
+    <!-- THE OVERLAY (What they see first) -->
+    <div id="overlay" onclick="startVideo()">
+        <button class="play-btn">Watch Memorial</button>
+        <div class="sub-text">Click anywhere to start</div>
     </div>
+
+    <!-- THE VIDEO PLAYER -->
+    <!-- REPLACE THE LINK BELOW WITH YOUR COPIED GITHUB RELEASE LINK -->
+    <video id="memorial-video" playsinline loop>
+        <source src="PASTE_YOUR_COPIED_RELEASE_LINK_HERE" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+
+    <script>
+        function startVideo() {
+            var video = document.getElementById('memorial-video');
+            var overlay = document.getElementById('overlay');
+
+            // 1. Play the video
+            video.play().then(() => {
+                // 2. If it plays successfully, fade out the overlay
+                overlay.style.opacity = '0';
+                
+                // 3. Remove overlay from screen after fade finishes (1 second)
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 1000);
+            }).catch(error => {
+                console.log("Play prevented:", error);
+                alert("Please tap the screen to play.");
+            });
+        }
+    </script>
 
 </body>
 </html>
