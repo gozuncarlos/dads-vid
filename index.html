@@ -2,27 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- 1. FORCE MOBILE SCALING: This line stops the "tiny text" issue -->
+    <!-- CRITICAL MOBILE TAGS: 
+         1. prevents zooming 
+         2. handles the iPhone notch 
+         3. forces 1:1 scale -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>In Loving Memory</title>
-    <link rel="icon" href="data:,">
+    
+    <!-- Elegant Fonts for the Memorial Feel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+
     <style>
-        /* Global Reset */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        /* 1. MOBILE RESET */
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; /* Removes blue box on Android taps */
+        }
         
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100%;
-            background-color: #000; /* Pure black */
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            /* 100dvh = Dynamic Viewport Height (Ignores mobile URL bar) */
+            height: 100dvh; 
+            background-color: #000;
+            overflow: hidden; /* Locks scrolling */
         }
 
-        /* The Video Container */
+        /* 2. LAYOUT CONTAINER */
         #container {
-            position: fixed; /* Locks it to the screen */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
@@ -33,99 +44,188 @@
             background: #000;
         }
 
-        /* The Video Player */
+        /* 3. VIDEO - SAFE FIT */
         video {
             width: 100%;
             height: 100%;
-            /* 'contain' adds black bars so no text is cut off */
+            /* 'contain' ensures NO text is ever cut off on any phone */
             object-fit: contain; 
+            opacity: 0; /* Hidden until loaded */
+            transition: opacity 0.5s ease;
         }
 
-        /* THE OVERLAY (Start Screen) */
+        /* 4. THE DESIGNED OVERLAY */
         #overlay {
-            position: fixed; /* STICKS to the front. No scrolling. */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: black;
-            z-index: 999; /* Always on top */
+            /* Elegant dark gradient */
+            background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%);
+            z-index: 100;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            transition: opacity 0.5s ease;
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.8s ease, visibility 0.8s;
         }
 
-        /* THE BUTTON - MADE HUGE FOR MOBILE */
-        .play-btn {
-            background: transparent;
+        /* 5. TYPOGRAPHY (Responsive) */
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
             color: white;
-            border: 2px solid white;
-            
-            /* Responsive Sizing: Button is always 60% of screen width */
-            width: 60vw; 
-            max-width: 300px; /* Don't get too huge on desktop */
-            
-            padding: 20px 0; /* Tall click area */
-            font-size: 1.2rem; /* Big text */
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            border-radius: 50px;
-            text-align: center;
-            pointer-events: none; /* Allows click to pass through to the div */
+            font-weight: 400;
+            /* Text scales with screen width (vmin) so it never breaks */
+            font-size: 8vmin; 
+            margin-bottom: 40px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            line-height: 1.2;
         }
-        
-        .hint {
-            color: #888;
-            margin-top: 25px;
-            font-size: 1rem; /* Readable text */
+
+        /* 6. THE BIG BUTTON */
+        .btn-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The Circle Ring */
+        .circle {
+            width: 100%;
+            height: 100%;
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
             animation: pulse 2s infinite;
         }
 
-        /* Pulse animation to show it's active */
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+        /* The Play Triangle */
+        .play-icon {
+            position: absolute;
+            width: 0; 
+            height: 0; 
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            border-left: 20px solid white;
+            margin-left: 5px; /* Visual center correction */
         }
+
+        .tap-text {
+            margin-top: 25px;
+            font-family: 'Lato', sans-serif;
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* 7. LOADING STATE */
+        .spinner {
+            display: none; /* Hidden by default */
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            position: absolute;
+        }
+
+        /* 8. ORIENTATION HINT */
+        .rotate-hint {
+            position: absolute;
+            bottom: 40px;
+            font-family: 'Lato', sans-serif;
+            color: #555;
+            font-size: 11px;
+            display: none;
+        }
+        /* Only show rotate hint if phone is vertical */
+        @media (orientation: portrait) { .rotate-hint { display: block; } }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(255,255,255,0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body>
 
     <div id="container">
         
-        <!-- START SCREEN OVERLAY -->
-        <!-- Added touchstart to make it faster on Android -->
-        <div id="overlay" onclick="startVideo()" ontouchstart="startVideo()">
-            <div class="play-btn">Watch Video</div>
-            <div class="hint">Tap anywhere to start</div>
+        <!-- THE OVERLAY -->
+        <!-- Added touchstart for faster response on Android/iOS -->
+        <div id="overlay" onclick="startExperience()" ontouchstart="startExperience()">
+            <h1>In Loving<br>Memory</h1>
+            
+            <div class="btn-wrapper">
+                <div class="circle" id="btn-circle"></div>
+                <div class="play-icon" id="btn-icon"></div>
+                <!-- Loading spinner sits on top -->
+                <div class="spinner" id="loading-spinner"></div>
+            </div>
+
+            <div class="tap-text" id="status-text">Watch Video</div>
+            <div class="rotate-hint">↻ Rotate phone for best view</div>
         </div>
 
-        <!-- VIDEO PLAYER -->
-        <video id="vid" playsinline>
-            <!-- YOUR GITHUB LINK -->
+        <!-- THE VIDEO -->
+        <!-- Your GitHub Release Link -->
+        <video id="vid" playsinline preload="auto">
             <source src="https://github.com/gozuncarlos/dads-vid/releases/download/video/funeral-ceremony.for.tito.dads.pptx.mp4" type="video/mp4">
         </video>
 
     </div>
 
     <script>
-        function startVideo() {
-            var v = document.getElementById('vid');
-            var o = document.getElementById('overlay');
+        var isTryingToPlay = false;
 
-            // Play the video
-            v.play().then(() => {
-                // Fade out overlay instantly
-                o.style.opacity = '0';
+        function startExperience() {
+            // Prevent double taps
+            if (isTryingToPlay) return;
+            isTryingToPlay = true;
+
+            var video = document.getElementById('vid');
+            var overlay = document.getElementById('overlay');
+            var icon = document.getElementById('btn-icon');
+            var spinner = document.getElementById('loading-spinner');
+            var circle = document.getElementById('btn-circle');
+            var text = document.getElementById('status-text');
+
+            // 1. IMMEDIATE FEEDBACK (Crucial for mobile data)
+            // Change UI to "Loading" so they know it worked
+            icon.style.display = 'none';
+            circle.style.animation = 'none'; // Stop pulsing
+            circle.style.border = 'none';
+            spinner.style.display = 'block';
+            text.innerText = "LOADING...";
+
+            // 2. PLAY COMMAND
+            video.play().then(() => {
+                // 3. SUCCESS
+                video.style.opacity = '1'; // Reveal video
+                overlay.style.opacity = '0'; // Hide overlay
                 setTimeout(() => { 
-                    o.style.display = 'none'; 
-                }, 500);
+                    overlay.style.visibility = 'hidden'; 
+                }, 800);
             }).catch(error => {
-                console.log("Auto-play blocked, waiting for interaction.");
+                // 4. ERROR (Reset UI if it fails)
+                console.log("Play failed", error);
+                isTryingToPlay = false;
+                spinner.style.display = 'none';
+                icon.style.display = 'block';
+                circle.style.border = '1px solid rgba(255,255,255,0.4)';
+                text.innerText = "TAP TO PLAY";
             });
         }
     </script>
