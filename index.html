@@ -2,27 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- This meta tag is critical for mobile scaling and the 'notch' on iPhones -->
+    <!-- 1. FORCE MOBILE SCALING: This line stops the "tiny text" issue -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>In Loving Memory</title>
     <link rel="icon" href="data:,">
     <style>
-        /* 1. Global Reset */
-        * { box-sizing: border-box; }
+        /* Global Reset */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body, html {
             margin: 0;
             padding: 0;
-            width: 100vw;
-            /* Use dvh (Dynamic Viewport Height) to fix mobile address bar jumps */
-            height: 100dvh; 
-            background-color: black;
+            width: 100%;
+            height: 100%;
+            background-color: #000; /* Pure black */
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        /* 2. Main Container */
+        /* The Video Container */
         #container {
-            position: absolute;
+            position: fixed; /* Locks it to the screen */
             top: 0;
             left: 0;
             width: 100%;
@@ -30,73 +30,66 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: black;
+            background: #000;
         }
 
-        /* 3. The Video Logic - "Contain" ensures no text is cut off */
+        /* The Video Player */
         video {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Ensures the whole video is visible */
+            /* 'contain' adds black bars so no text is cut off */
+            object-fit: contain; 
         }
 
-        /* 4. The Overlay (Start Screen) */
+        /* THE OVERLAY (Start Screen) */
         #overlay {
-            position: absolute;
+            position: fixed; /* STICKS to the front. No scrolling. */
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-color: black;
-            z-index: 50;
+            z-index: 999; /* Always on top */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.8s ease;
+            cursor: pointer;
+            transition: opacity 0.5s ease;
         }
 
-        /* 5. Button Styling */
+        /* THE BUTTON - MADE HUGE FOR MOBILE */
         .play-btn {
             background: transparent;
             color: white;
             border: 2px solid white;
-            padding: 18px 36px;
-            font-size: 18px;
+            
+            /* Responsive Sizing: Button is always 60% of screen width */
+            width: 60vw; 
+            max-width: 300px; /* Don't get too huge on desktop */
+            
+            padding: 20px 0; /* Tall click area */
+            font-size: 1.2rem; /* Big text */
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             border-radius: 50px;
-            pointer-events: none;
-        }
-
-        .hint {
-            color: #aaa;
-            margin-top: 20px;
-            font-size: 14px;
             text-align: center;
-            max-width: 80%;
-            line-height: 1.5;
+            pointer-events: none; /* Allows click to pass through to the div */
         }
-
-        /* 6. Landscape Recommendation (Optional but helpful) */
-        .rotate-hint {
-            position: absolute;
-            bottom: 30px;
-            color: #666;
-            font-size: 12px;
-            display: none; /* Hidden by default */
+        
+        .hint {
+            color: #888;
+            margin-top: 25px;
+            font-size: 1rem; /* Readable text */
             animation: pulse 2s infinite;
         }
 
-        /* Only show rotate hint on portrait phones */
-        @media (orientation: portrait) {
-            .rotate-hint { display: block; }
-        }
-
+        /* Pulse animation to show it's active */
         @keyframes pulse {
-            0% { opacity: 0.5; }
+            0% { opacity: 0.6; }
             50% { opacity: 1; }
-            100% { opacity: 0.5; }
+            100% { opacity: 0.6; }
         }
     </style>
 </head>
@@ -105,17 +98,16 @@
     <div id="container">
         
         <!-- START SCREEN OVERLAY -->
-        <div id="overlay" onclick="startVideo()">
-            <button class="play-btn">Watch Memorial</button>
+        <!-- Added touchstart to make it faster on Android -->
+        <div id="overlay" onclick="startVideo()" ontouchstart="startVideo()">
+            <div class="play-btn">Watch Video</div>
             <div class="hint">Tap anywhere to start</div>
-            <div class="rotate-hint">↻ For best view, rotate your phone</div>
         </div>
 
         <!-- VIDEO PLAYER -->
-        <!-- playsinline is REQUIRED for iPhone to not go full-screen automatically -->
         <video id="vid" playsinline>
+            <!-- YOUR GITHUB LINK -->
             <source src="https://github.com/gozuncarlos/dads-vid/releases/download/video/funeral-ceremony.for.tito.dads.pptx.mp4" type="video/mp4">
-            Your browser does not support the video tag.
         </video>
 
     </div>
@@ -125,15 +117,15 @@
             var v = document.getElementById('vid');
             var o = document.getElementById('overlay');
 
+            // Play the video
             v.play().then(() => {
-                // If play is successful, fade out overlay
+                // Fade out overlay instantly
                 o.style.opacity = '0';
                 setTimeout(() => { 
                     o.style.display = 'none'; 
-                }, 800);
+                }, 500);
             }).catch(error => {
-                console.log("Play error: " + error);
-                // If it fails, usually means user needs to tap again (browser blocked it)
+                console.log("Auto-play blocked, waiting for interaction.");
             });
         }
     </script>
