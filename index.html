@@ -4,45 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>In Loving Memory</title>
-    <!-- This fixes the favicon 404 error -->
-    <link rel="icon" href="data:,"> 
+    <link rel="icon" href="data:,">
     <style>
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
             background-color: black;
+            overflow: hidden;
         }
 
-        .video-background {
+        .video-wrapper {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
 
         iframe {
+            /* This zooms the video to hide the YouTube interface */
+            width: 100vw;
+            height: 56.25vw; 
+            min-height: 100vh;
+            min-width: 177.77vh;
+            transform: scale(1.35); 
+            border: none;
+        }
+
+        /* Blocks right-clicking on the video */
+        .overlay-shield {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            border: none; /* Removes the border */
+            z-index: 10;
+            pointer-events: none; 
         }
     </style>
 </head>
 <body>
 
-    <div class="video-background">
-        <!-- 
-           REPLACE 'PASTE_YOUR_ID_HERE' BELOW WITH YOUR VIDEO ID.
-           Do it in TWO places (see the comments).
-        -->
+    <div class="video-wrapper">
+        <!-- Your Video ID: KM4iIl4njqU -->
         <iframe 
-            src="https://www.youtube.com/embed/KM4iIl4njqU?autoplay=0&controls=1&rel=0&modestbranding=1&loop=1&playlist=KM4iIl4njqU" 
+            src="https://www.youtube.com/embed/KM4iIl4njqU?autoplay=0&controls=0&disablekb=1&playsinline=1&modestbranding=1&rel=0&loop=1&playlist=KM4iIl4njqU" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
         </iframe>
+        
+        <div class="overlay-shield"></div>
     </div>
 
 </body>
