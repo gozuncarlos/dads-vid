@@ -30,7 +30,6 @@
             width: 100%; height: 100dvh; 
             z-index: 1;
             background: #000;
-            /* FIX: Visibility hidden ensures NO ghosting during intro */
             opacity: 0; 
             visibility: hidden; 
             transition: opacity 2s ease;
@@ -63,7 +62,6 @@
             background-size: cover; background-position: center;
             filter: blur(30px) brightness(0.4); 
             z-index: -1;
-            /* FIX: Visibility hidden ensures NO ghosting during intro */
             opacity: 0; 
             visibility: hidden;
             transition: opacity 2s ease;
@@ -189,15 +187,18 @@
         <button class="ctrl-btn" onclick="nextSlide(event)">Next</button>
     </div>
 
-    <audio id="bg-music"></audio>
+    <audio id="bg-music" preload="auto"></audio>
 
     <script>
         // CONFIG
+        // NOTE: On GitHub, filenames are case-sensitive!
+        // Ensure your file is named "music.mp3" inside a "music" folder.
         const playlist = [
-    "music/music.mp3" 
-    ];
+            "music/music.mp3"
+        ];
 
         const images = [];
+        // NOTE: Ensure images are named "photo1.jpg" (lowercase jpg)
         for (let i = 1; i <= 46; i++) {
             images.push(`./images/photo${i}.jpg`);
         }
@@ -217,6 +218,13 @@
         const bgLayer = document.getElementById('bg-layer');
         const audio = document.getElementById('bg-music');
         const controls = document.getElementById('controls');
+
+        // ERROR HANDLING
+        audio.addEventListener('error', function(e) {
+            console.error("Audio Error:", e);
+            // This alert helps you verify if the file is missing on GitHub
+            alert("Audio file not found. Please check that your file on GitHub is named 'music.mp3' (lowercase) inside the 'music' folder.");
+        });
 
         // SWIPE LOGIC
         container.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, {passive: true});
@@ -240,6 +248,7 @@
         // MUSIC
         function initMusic() {
             audio.src = playlist[0];
+            // audio.load() is technically called by setting src, but explicit load is fine
             audio.load();
             audio.onended = function() {
                 if(isEnding) return;
@@ -329,8 +338,15 @@
             const introScreen = document.getElementById('intro-sequence');
             const hint = document.getElementById('swipe-hint');
             
-            audio.volume = 1.0;
-            audio.play().catch(e => console.log("Audio play error", e));
+            // Re-load to ensure mobile browsers are happy with the user interaction
+            if (audio.paused) {
+                audio.play().then(() => {
+                    audio.volume = 1.0;
+                }).catch(e => {
+                    console.log("Audio play error", e);
+                    alert("Could not play audio. Check file path.");
+                });
+            }
 
             startScreen.classList.remove('screen-active');
             introScreen.classList.add('screen-active');
@@ -344,17 +360,3 @@
                 bgLayer.style.visibility = 'visible';
                 
                 // START FADE IN
-                container.style.opacity = '1';
-                bgLayer.style.opacity = '1';
-                
-                hint.style.opacity = '1';
-                setTimeout(() => { hint.style.opacity = '0'; }, 4000);
-                startAutoPlay();
-            }, 4500);
-        }
-
-        initSlides();
-        initMusic();
-    </script>
-</body>
-</html>
