@@ -360,3 +360,17 @@
                 bgLayer.style.visibility = 'visible';
                 
                 // START FADE IN
+                container.style.opacity = '1';
+                bgLayer.style.opacity = '1';
+                
+                hint.style.opacity = '1';
+                setTimeout(() => { hint.style.opacity = '0'; }, 4000);
+                startAutoPlay();
+            }, 4500);
+        }
+
+        initSlides();
+        initMusic();
+    </script>
+</body>
+</html>
