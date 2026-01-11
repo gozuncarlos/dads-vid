@@ -1,42 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <!-- Viewport fit=cover is crucial for full screen on notch phones -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Diosdado M. Gozun</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
-
-    <style>
+<style>
         * { 
             box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; /* Removes blue tap box on Android */
-            touch-action: pan-y; /* Disables double-tap zoom */
+            -webkit-tap-highlight-color: transparent; 
+            touch-action: pan-y;
         }
         
         body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
-            background-color: #000; overflow: hidden; 
-            user-select: none; /* Prevents text selection on long press */
+            margin: 0; padding: 0; 
+            width: 100%; 
+            height: 100%; 
+            /* Fix for mobile address bar scrolling issues */
+            height: 100dvh; 
+            background-color: #000; 
+            overflow: hidden; 
+            user-select: none; 
             -webkit-user-select: none;
         }
 
-        /* --- VISUAL LAYERS --- */
+        /* --- LAYERS --- */
         #slideshow-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
-            opacity: 0; transition: opacity 2s ease;
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; 
+            height: 100dvh; /* Force full mobile height */
+            z-index: 1;
+            background: #000;
         }
 
         .slide {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0; transition: opacity 2s ease-in-out;
+            position: absolute; top: 0; left: 0; 
+            width: 100%; 
+            height: 100%;
+            opacity: 0; 
+            transition: opacity 1.5s ease-in-out;
+            /* Contain ensures the whole photo is visible without cropping */
             background-size: contain; 
             background-position: center; 
             background-repeat: no-repeat;
-            will-change: transform, opacity; /* GPU Acceleration for mobile */
+            will-change: opacity, transform; /* Mobile Hardware Acceleration */
         }
 
         .slide.active {
@@ -46,46 +47,52 @@
 
         @keyframes kenburns {
             from { transform: scale(1); }
-            to { transform: scale(1.1); }
+            to { transform: scale(1.08); } /* Reduced zoom to prevent mobile lag */
         }
 
+        /* Background Blur Layer */
         .blur-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
-            filter: blur(30px) brightness(0.4); z-index: -1;
-            opacity: 0; transition: opacity 2s ease, background-image 2s ease-in-out;
-            transform: scale(1.1); /* Prevents white edges from blur */
+            position: absolute; top: 0; left: 0; 
+            width: 100%; height: 100%;
+            background-size: cover; 
+            background-position: center;
+            filter: blur(30px) brightness(0.4); 
+            z-index: -1;
+            opacity: 0; 
+            transition: opacity 2s ease;
+            transform: scale(1.2); /* Scale up to hide blur edges */
         }
 
         /* --- TEXT SCREENS --- */
         .screen-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 100; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
-            pointer-events: none; opacity: 0; transition: opacity 1.5s ease;
+            position: fixed; top: 0; left: 0; 
+            width: 100%; height: 100dvh;
+            z-index: 100; 
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center; 
+            text-align: center;
+            pointer-events: none; 
+            opacity: 0; transition: opacity 1.5s ease;
             background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%);
         }
 
-        .screen-active {
-            opacity: 1; pointer-events: auto;
-        }
+        .screen-active { opacity: 1; pointer-events: auto; }
 
         h1 {
             font-family: 'Playfair Display', serif; font-style: italic; color: white;
             font-weight: 400; font-size: 8vmin; margin-bottom: 30px;
             text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            line-height: 1.2;
         }
 
         .sub-text {
             font-family: 'Lato', sans-serif; color: #aaa;
-            font-size: 3.5vmin; letter-spacing: 2px; margin-bottom: 15px;
+            font-size: 4vmin; letter-spacing: 2px; margin-bottom: 15px;
             font-weight: 300; text-transform: uppercase;
         }
 
-        /* --- BUTTONS --- */
+        /* --- BUTTONS & CONTROLS --- */
         .btn-wrapper {
-            width: 90px; height: 90px; /* Larger tap target */
+            width: 100px; height: 100px; 
             display: flex; justify-content: center; align-items: center; cursor: pointer;
         }
         .circle {
@@ -94,50 +101,39 @@
         }
         .play-text {
             position: absolute; font-family: 'Lato', sans-serif; color: white;
-            font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+            font-size: 14px; letter-spacing: 2px; text-transform: uppercase;
         }
 
-        /* --- CONTROLS --- */
         #controls {
-            position: fixed; 
-            bottom: 30px; 
-            /* iOS Safe Area Support */
-            padding-bottom: env(safe-area-inset-bottom); 
+            position: fixed; bottom: 30px; 
+            padding-bottom: env(safe-area-inset-bottom); /* iPhone Home Bar fix */
             left: 0; width: 100%; z-index: 50;
-            display: flex; justify-content: center; gap: 30px; 
+            display: flex; justify-content: center; gap: 20px; 
             opacity: 0; transition: opacity 0.5s;
-            pointer-events: none; /* Let clicks pass through if hidden */
+            pointer-events: none; 
         }
         
-        #controls.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #controls.visible { opacity: 1; pointer-events: auto; }
 
         .ctrl-btn {
-            background: rgba(0,0,0,0.3); /* Subtle backing for readability */
-            backdrop-filter: blur(5px);
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.2); 
-            color: rgba(255,255,255,0.9);
-            font-family: 'Lato', sans-serif; font-size: 12px; cursor: pointer;
-            text-transform: uppercase; letter-spacing: 2px; 
-            padding: 12px 25px; /* Large touch target */
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); 
+            color: white; font-family: 'Lato', sans-serif; font-size: 12px; 
+            text-transform: uppercase; letter-spacing: 1px; 
+            padding: 12px 24px;
         }
-        .ctrl-btn:active { background: white; color: black; }
 
         .replay-btn {
             margin-top: 40px; padding: 15px 35px;
             border: 1px solid rgba(255,255,255,0.3);
             color: white; background: transparent;
             font-family: 'Lato', sans-serif; text-transform: uppercase;
-            letter-spacing: 2px; cursor: pointer; transition: all 0.3s;
+            letter-spacing: 2px; cursor: pointer;
         }
 
-        /* Swipe Hint */
         .swipe-hint {
             position: fixed; bottom: 100px; width: 100%; text-align: center;
-            color: rgba(255,255,255,0.5); font-family: 'Lato'; font-size: 10px;
+            color: rgba(255,255,255,0.5); font-family: 'Lato'; font-size: 12px;
             text-transform: uppercase; letter-spacing: 2px;
             opacity: 0; transition: opacity 1s; pointer-events: none;
             padding-bottom: env(safe-area-inset-bottom);
@@ -149,249 +145,3 @@
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,255,255,0); }
         }
     </style>
-</head>
-<body>
-
-    <div class="blur-bg" id="bg-layer"></div>
-    
-    <!-- Slideshow container listens for clicks/taps -->
-    <div id="slideshow-container" onclick="toggleControls()"></div>
-
-    <!-- 1. INTRO SCREEN -->
-    <div id="intro-sequence" class="screen-overlay" style="background: black;">
-        <div class="sub-text">Remembering the memories of</div>
-        <h1 style="margin:0; font-size: 7vmin;">Diosdado M. Gozun</h1>
-    </div>
-
-    <!-- 2. START OVERLAY -->
-    <div id="start-overlay" class="screen-overlay screen-active">
-        <h1>In Loving<br>Memory</h1>
-        <div class="btn-wrapper" onclick="startExperience()">
-            <div class="circle"></div>
-            <div class="play-text">Enter</div>
-        </div>
-        <div style="margin-top: 20px; font-family: 'Lato'; color: #666; font-size: 12px;">Turn on sound</div>
-    </div>
-
-    <!-- 3. ENDING SCREEN -->
-    <div id="end-overlay" class="screen-overlay">
-        <h1>Forever in<br>Our Hearts</h1>
-        <div class="sub-text" style="font-size: 2.5vmin; margin-top: 10px;">Thank you for the memories</div>
-        <button class="replay-btn" onclick="location.reload()">Replay Tribute</button>
-    </div>
-
-    <!-- Swipe Hint Text -->
-    <div id="swipe-hint" class="swipe-hint">Swipe left or right</div>
-
-    <!-- Controls -->
-    <div id="controls" class="visible">
-        <button class="ctrl-btn" onclick="prevSlide(event)">Prev</button>
-        <button class="ctrl-btn" id="pause-btn" onclick="togglePause(event)">Pause</button>
-        <button class="ctrl-btn" onclick="nextSlide(event)">Next</button>
-    </div>
-
-    <audio id="bg-music"></audio>
-
-    <script>
-        // ==========================================
-        // CONFIG
-        // ==========================================
-        const images = [];
-        for (let i = 1; i <= 46; i++) {
-            images.push(`images/photo${i}.jpg`);
-        }
-
-        const playlist = [
-            "music/ytmp3free.cc_american-authors-best-day-of-my-life-lyrics-youtubemp3free.org.mp3",
-            "music/song2.mp3" 
-        ];
-
-        const slideDuration = 6000; 
-
-        // ==========================================
-        // STATE
-        // ==========================================
-        let currentIndex = 0;
-        let currentTrackIndex = 0;
-        let slideInterval;
-        let isPlaying = true;
-        let isEnding = false;
-        
-        // Swipe Variables
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        // DOM Elements
-        const container = document.getElementById('slideshow-container');
-        const bgLayer = document.getElementById('bg-layer');
-        const audio = document.getElementById('bg-music');
-        const controls = document.getElementById('controls');
-
-        // ==========================================
-        // SWIPE & TOUCH LOGIC (Mobile UX)
-        // ==========================================
-        container.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, {passive: true});
-
-        container.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, {passive: true});
-
-        function handleSwipe() {
-            if(isEnding) return;
-            const threshold = 50; // Minimum distance to count as swipe
-            if (touchEndX < touchStartX - threshold) {
-                // Swiped Left -> Next
-                nextSlide();
-                resetTimer();
-            }
-            if (touchEndX > touchStartX + threshold) {
-                // Swiped Right -> Prev
-                prevSlide();
-                resetTimer();
-            }
-        }
-
-        function toggleControls() {
-            if(isEnding) return;
-            controls.classList.toggle('visible');
-        }
-
-        // ==========================================
-        // MUSIC & SLIDES
-        // ==========================================
-        function initMusic() {
-            audio.src = playlist[0];
-            audio.load();
-            audio.onended = function() {
-                if(isEnding) return;
-                currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-                audio.src = playlist[currentTrackIndex];
-                audio.play();
-            };
-        }
-
-        function initSlides() {
-            images.forEach((url, index) => {
-                const slide = document.createElement('div');
-                slide.className = 'slide';
-                if(index === 0) slide.classList.add('active');
-                slide.style.backgroundImage = `url('${url}')`;
-                container.appendChild(slide);
-            });
-            bgLayer.style.backgroundImage = `url('${images[0]}')`;
-        }
-
-        function showSlide(index) {
-            const slides = document.querySelectorAll('.slide');
-            slides.forEach(s => s.classList.remove('active'));
-            slides[index].classList.add('active');
-            bgLayer.style.backgroundImage = `url('${images[index]}')`;
-        }
-
-        function nextSlide(e) {
-            if(e) e.stopPropagation(); // Prevent toggling controls when button clicked
-            if (isEnding) return;
-
-            if (currentIndex >= images.length - 1) {
-                triggerEnding();
-                return;
-            }
-            currentIndex++;
-            showSlide(currentIndex);
-        }
-
-        function prevSlide(e) {
-            if(e) e.stopPropagation();
-            if (currentIndex > 0) {
-                currentIndex--;
-                showSlide(currentIndex);
-            }
-        }
-
-        function startAutoPlay() {
-            clearInterval(slideInterval);
-            slideInterval = setInterval(nextSlide, slideDuration);
-        }
-
-        function resetTimer() {
-            if(isPlaying) startAutoPlay();
-        }
-
-        function togglePause(e) {
-            if(e) e.stopPropagation();
-            if(isEnding) return;
-            
-            const btn = document.getElementById('pause-btn');
-            if(isPlaying) {
-                clearInterval(slideInterval);
-                btn.innerText = "Play";
-                isPlaying = false;
-            } else {
-                nextSlide();
-                startAutoPlay();
-                btn.innerText = "Pause";
-                isPlaying = true;
-            }
-        }
-
-        // ==========================================
-        // SEQUENCES
-        // ==========================================
-        function triggerEnding() {
-            isEnding = true;
-            clearInterval(slideInterval);
-            
-            setTimeout(() => {
-                controls.classList.remove('visible');
-                container.style.opacity = '0';
-                bgLayer.style.opacity = '0';
-                document.getElementById('swipe-hint').style.opacity = '0';
-
-                fadeOutAudio();
-                document.getElementById('end-overlay').classList.add('screen-active');
-            }, 5000); 
-        }
-
-        function fadeOutAudio() {
-            let fade = setInterval(function () {
-                if ((audio.volume > 0.1)) {
-                    audio.volume -= 0.1;
-                } else {
-                    clearInterval(fade);
-                    audio.pause();
-                }
-            }, 400);
-        }
-
-        function startExperience() {
-            const startScreen = document.getElementById('start-overlay');
-            const introScreen = document.getElementById('intro-sequence');
-            const hint = document.getElementById('swipe-hint');
-            
-            audio.volume = 1.0;
-            audio.play().catch(e => console.log("Audio play error", e));
-
-            startScreen.classList.remove('screen-active');
-            introScreen.classList.add('screen-active');
-
-            setTimeout(() => {
-                introScreen.classList.remove('screen-active');
-                container.style.opacity = '1';
-                bgLayer.style.opacity = '1';
-                
-                // Show swipe hint briefly
-                hint.style.opacity = '1';
-                setTimeout(() => { hint.style.opacity = '0'; }, 4000);
-                
-                startAutoPlay();
-            }, 4500);
-        }
-
-        initSlides();
-        initMusic();
-    </script>
-</body>
-</html>
